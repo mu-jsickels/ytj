@@ -1,0 +1,75 @@
+#/bin/bash
+	#mplayer -really-quiet -vo null ytvid.webm < /dev/null &
+	#dealing with arguments h k & l
+	h=0
+	k=0
+	l=0
+	loop=1
+	while [ "$loop" = "1" ]	
+		do	
+		loop=0
+		if [ "$1" = "-h" ]
+			then	
+			loop=1
+			h=1
+			shift
+			fi 
+		if [ "$1" = "-k" ]
+			then	
+			loop=1			
+			k=1
+			shift
+			fi
+		if [ "$1" = "-l" ]
+			then		
+			loop=1			
+			l=1
+			shift
+			fi
+		if [ "$1" = "-kl" -o "$1" = "-lk" ]
+			then
+			loop=1
+			k=1
+			l=1
+			shift						
+			fi
+		done
+		if [ "$#" -eq 0 ]
+			then			
+			h=1 
+			fi
+	if [ "$h" = "1" ]
+		then		
+		echo "basic usage statement filler"
+		exit
+		fi
+	# gets  the input search	 
+	echo -n "http://www.youtube.com/results?search_query=" > searchlink # begining of adress
+	while [ "$#" -gt 0 ] # loop to get the input and add it to the adress
+	    	do
+		echo -n $1 >> searchlink
+		echo -n "+">> searchlink
+		echo -n $1 >> foldername
+		if [ "$#" -ne 1 ]
+			then
+			echo -n "_">> foldername
+			fi
+		shift
+    		done		
+	echo -n "%2C+video&lclk=video" >> searchlink	# add the end of the adress		
+	
+	wget  -i searchlink -O search 2> /dev/null #get an html file for the adress
+	rm searchlink	
+	
+	# extract  links 
+	cat search | #inputs the html file from the search
+	grep -E -o ".{0,0}watch\?.{0,13}" | # finds the links and extracts them
+	uniq | #gets rid of multiple copys of the same link
+	sed 's/^/\http\:\/\/www\.youtube\.com\//' | # add the url stuff so the link works 
+	sed -e '$d' > links # deletes the last line which is junk
+	rm search
+# mkdir
+#cd
+#cclive
+#playfiles
+		
